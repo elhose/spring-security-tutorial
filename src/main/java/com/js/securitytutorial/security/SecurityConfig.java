@@ -11,6 +11,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+import static com.js.securitytutorial.security.ApplicationUserRole.ADMIN;
+import static com.js.securitytutorial.security.ApplicationUserRole.STUDENT;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -24,8 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-            .antMatchers("/", "index", "/css/*", "/js/*")
-            .permitAll()
+            .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
+            .antMatchers("/api/**").hasAnyRole(STUDENT.name())
             .anyRequest()
             .authenticated()
             .and()
@@ -36,15 +39,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     protected UserDetailsService userDetailsService() {
         UserDetails student = User.builder()
-                                      .username("John")
-                                      .password(passwordEncoder.encode("password"))
-                                      .roles(ApplicationUserRole.STUDENT.name()) //ROLE_STUDENT
-                                      .build();
+                                  .username("Jim")
+                                  .password(passwordEncoder.encode("password"))
+                                  .roles(STUDENT.name()) //ROLE_STUDENT
+                                  .build();
 
         UserDetails admin = User.builder()
-                                .username("Tom")
+                                .username("Michael")
                                 .password(passwordEncoder.encode("password123"))
-                                .roles(ApplicationUserRole.ADMIN.name()) //ROLE_ADMIN
+                                .roles(ADMIN.name()) //ROLE_ADMIN
                                 .build();
         return new InMemoryUserDetailsManager(student, admin);
     }
