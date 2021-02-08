@@ -9,7 +9,8 @@ import static com.js.securitytutorial.security.ApplicationUserPermission.*;
 
 public enum ApplicationUserRole {
     STUDENT(new HashSet<>(Collections.emptySet())),
-    ADMIN(new HashSet<>(Arrays.asList(COURSE_READ, COURSE_WRITE, STUDENT_READ, STUDENT_WRITE)));
+    ADMIN(new HashSet<>(Arrays.asList(COURSE_READ, COURSE_WRITE, STUDENT_READ, STUDENT_WRITE))),
+    ADMIN_TRAINEE(new HashSet<>(Arrays.asList(COURSE_READ, STUDENT_READ)));
 
     private final Set<ApplicationUserPermission> permissions;
 
