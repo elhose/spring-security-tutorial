@@ -27,8 +27,14 @@ public enum ApplicationUserRole {
     }
 
     public Set<GrantedAuthority> getGrantedAuthorities() {
-        return getPermissions().stream()
-                               .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
-                               .collect(Collectors.toSet());
+        Set<GrantedAuthority> grantedAuthorities = getPermissions().stream()
+                                                        .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
+                                                        .collect(Collectors.toSet());
+        grantedAuthorities.add(createRoleGrantedAuthority());
+        return grantedAuthorities;
+    }
+
+    private GrantedAuthority createRoleGrantedAuthority() {
+        return new SimpleGrantedAuthority("ROLE_" + this.name());
     }
 }
