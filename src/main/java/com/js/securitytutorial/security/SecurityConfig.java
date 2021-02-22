@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 
+import java.util.concurrent.TimeUnit;
+
 import static com.js.securitytutorial.security.ApplicationUserPermission.*;
 import static com.js.securitytutorial.security.ApplicationUserRole.*;
 
@@ -44,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .loginPage("/login").permitAll()
             .defaultSuccessUrl("/courses", true)
             .and()
-            .rememberMe(); // default remember me is valid for 14 Days
+            .rememberMe().tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21)).key("something-very-secure");
     }
 
     @Override
