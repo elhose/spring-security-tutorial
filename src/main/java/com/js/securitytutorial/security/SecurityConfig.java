@@ -42,7 +42,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .and()
             .formLogin()
             .loginPage("/login").permitAll()
-            .defaultSuccessUrl("/courses", true);
+            .defaultSuccessUrl("/courses", true)
+            .and()
+            .rememberMe(); // default remember me is valid for 14 Days
     }
 
     @Override
