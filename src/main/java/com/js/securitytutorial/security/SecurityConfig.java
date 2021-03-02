@@ -1,6 +1,7 @@
 package com.js.securitytutorial.security;
 
 import com.js.securitytutorial.auth.ApplicationUserService;
+import com.js.securitytutorial.jwt.JwtUsernameAndPasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -9,12 +10,10 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import java.util.concurrent.TimeUnit;
-
-import static com.js.securitytutorial.security.ApplicationUserRole.*;
+import static com.js.securitytutorial.security.ApplicationUserRole.STUDENT;
 
 @Configuration
 @EnableWebSecurity
@@ -35,30 +34,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //            .csrf().csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 //            .and()
             .csrf().disable()
+            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            .and()
+            .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager()))
             .authorizeRequests()
             .antMatchers("/", "index", "/css/*", "/js/*").permitAll()
             .antMatchers("/api/**").hasAnyRole(STUDENT.name())
             .anyRequest()
-            .authenticated()
-            .and()
-            .formLogin()
-                .loginPage("/login").permitAll()
-                .defaultSuccessUrl("/courses", true)
-                .usernameParameter("user-param")
-                .passwordParameter("pass-param")
-            .and()
-            .rememberMe()
-                .tokenValiditySeconds((int) TimeUnit.DAYS.toSeconds(21))
-                .key("something-very-secure")
-                .rememberMeParameter("remember-param")
-            .and()
-            .logout()
-                .logoutUrl("/logout")
-                .logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"))
-                .clearAuthentication(true)
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID", "remember-me")
-                .logoutSuccessUrl("/login");
+            .authenticated();
     }
 
     @Override
