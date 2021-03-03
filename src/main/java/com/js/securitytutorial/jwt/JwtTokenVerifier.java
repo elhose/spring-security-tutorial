@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -12,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import javax.crypto.SecretKey;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -23,23 +23,29 @@ import java.util.stream.Collectors;
 
 public class JwtTokenVerifier extends OncePerRequestFilter {
 
+    private final JwtConfig jwtConfig;
+    private final SecretKey secretKey;
+
+    public JwtTokenVerifier(JwtConfig jwtConfig, SecretKey secretKey) {
+        this.jwtConfig = jwtConfig;
+        this.secretKey = secretKey;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String authorizationHeader = request.getHeader("Authorization");
 
         // if token is null or empty, or doesnt start with "Bearer ", just return request and response to chain, don't bother authenticating
-        if (null == authorizationHeader || authorizationHeader.isEmpty() || !authorizationHeader.startsWith("Bearer ")) {
+        if (null == authorizationHeader || authorizationHeader.isEmpty() || !authorizationHeader.startsWith(jwtConfig.getTokenPrefix())) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = authorizationHeader.replace("Bearer ", "");
+        String token = authorizationHeader.replace(jwtConfig.getTokenPrefix(), "");
         try {
-            byte[] key = "secureVeryLongKeyToMakeItHarderForAnyoneElseToCrackThat".getBytes();
-
             Jws<Claims> claimsJws = Jwts.parserBuilder()
-                                        .setSigningKey(Keys.hmacShaKeyFor(key))
+                                        .setSigningKey(secretKey)
                                         .build()
                                         .parseClaimsJws(token);
 
